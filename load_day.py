@@ -13,5 +13,5 @@ else:
 
 
 os.system(
-    f'curl --cookie "session={session}" https://adventofcode.com/2023/day/{day}/input > day_{day}.txt'
+    f'curl --cookie "session={session}" https://adventofcode.com/2023/day/{day}/input > day_{day:02d}.txt'
 )
