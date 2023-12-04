@@ -13,7 +13,7 @@ def part_1(engine_rows: list[str], symbols: set[str]) -> int:
 
     for row, vals in enumerate(engine_rows):
         for col, char in enumerate(vals):
-            if char in "0123456789":
+            if char in digits:
                 subject_buffer.add((row,col))
                 number_buffer += char
                 reading_number = True
@@ -28,26 +28,14 @@ def part_1(engine_rows: list[str], symbols: set[str]) -> int:
     return total
 
 def part_2(engine_rows: list[str]) -> int:
-    """
-    I want to find all of the "gears"
-    When I find a gear, grab the border using the existing function.
-    Pass the border through the "has_symbol" with numbers
-    Pass the border with numbers through a group_contiguous function.
-    If the length of the output is 2,
-        Start a process to grab those numbers.
-        glob_numbers?
-    """
-
-
     engine_dimensions = (len(engine_rows), len(engine_rows[0]))
 
     gear_ratio_sums = 0
     for row, vals in enumerate(engine_rows):
-        print(vals, end="\t")
         for col, char in enumerate(vals):
             if char == "*":
                 bordering_cells = border({(row,col)}, engine_dimensions)
-                numeric_bordering_cells = {cell for cell in bordering_cells if has_symbol(engine_rows, {cell}, {"0","1","2","3","4","5","6","7","8","9"})}
+                numeric_bordering_cells = {cell for cell in bordering_cells if has_symbol(engine_rows, {cell}, digits)}
                 grouped_rows = group_rows(numeric_bordering_cells)
                 number_count = 0
                 for r in grouped_rows:
@@ -55,21 +43,15 @@ def part_2(engine_rows: list[str]) -> int:
                         number_count += 1
                     else:
                         number_count += 2
-                # print(numeric_bordering_cells, end=" : ")
-                # print(number_count, end="\t")
                 if number_count == 2:
                     ratio = get_ratio(engine_rows, grouped_rows)
                     gear_ratio_sums += ratio
-        print(gear_ratio_sums, end="\t")
-        print()
-
 
     return gear_ratio_sums
 
 
 def get_ratio(engine_rows: list[str] ,rows: list[set[tuple[int,int]]]) -> int:
     ratio = 1
-    print("( ", end="")
     for row in rows:
         if are_contiguous(row):
             ratio *= glob_number(engine_rows, row.pop())
@@ -78,7 +60,6 @@ def get_ratio(engine_rows: list[str] ,rows: list[set[tuple[int,int]]]) -> int:
             a, b = cells[0], cells[1]
             ratio *= glob_number(engine_rows, a)
             ratio *= glob_number(engine_rows, b)
-    print(f")", end="\t")
 
     return ratio
 
@@ -98,7 +79,6 @@ def glob_number(engine_rows: list[str], cell: tuple[int,int]) -> int:
         if val not in digits:
             break
         number += val
-    print(number, end=" ")
 
     return int(number)
 
