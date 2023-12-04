@@ -1,6 +1,7 @@
 from lib import read, tee
 
-digits = {"0","1","2","3","4","5","6","7","8","9"}
+digits = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+
 
 def part_1(engine_rows: list[str], symbols: set[str]) -> int:
     engine_dimensions = (len(engine_rows), len(engine_rows[0]))
@@ -14,18 +15,21 @@ def part_1(engine_rows: list[str], symbols: set[str]) -> int:
     for row, vals in enumerate(engine_rows):
         for col, char in enumerate(vals):
             if char in digits:
-                subject_buffer.add((row,col))
+                subject_buffer.add((row, col))
                 number_buffer += char
                 reading_number = True
             else:
                 if reading_number:
-                    if has_symbol(engine_rows, border(subject_buffer, engine_dimensions), symbols):
+                    if has_symbol(
+                        engine_rows, border(subject_buffer, engine_dimensions), symbols
+                    ):
                         total += int(number_buffer)
                     subject_buffer.clear()
                     number_buffer = ""
                 reading_number = False
 
     return total
+
 
 def part_2(engine_rows: list[str]) -> int:
     engine_dimensions = (len(engine_rows), len(engine_rows[0]))
@@ -34,8 +38,12 @@ def part_2(engine_rows: list[str]) -> int:
     for row, vals in enumerate(engine_rows):
         for col, char in enumerate(vals):
             if char == "*":
-                bordering_cells = border({(row,col)}, engine_dimensions)
-                numeric_bordering_cells = {cell for cell in bordering_cells if has_symbol(engine_rows, {cell}, digits)}
+                bordering_cells = border({(row, col)}, engine_dimensions)
+                numeric_bordering_cells = {
+                    cell
+                    for cell in bordering_cells
+                    if has_symbol(engine_rows, {cell}, digits)
+                }
                 grouped_rows = group_rows(numeric_bordering_cells)
                 number_count = 0
                 for r in grouped_rows:
@@ -50,7 +58,7 @@ def part_2(engine_rows: list[str]) -> int:
     return gear_ratio_sums
 
 
-def get_ratio(engine_rows: list[str] ,rows: list[set[tuple[int,int]]]) -> int:
+def get_ratio(engine_rows: list[str], rows: list[set[tuple[int, int]]]) -> int:
     ratio = 1
     for row in rows:
         if are_contiguous(row):
@@ -63,18 +71,19 @@ def get_ratio(engine_rows: list[str] ,rows: list[set[tuple[int,int]]]) -> int:
 
     return ratio
 
-def glob_number(engine_rows: list[str], cell: tuple[int,int]) -> int:
+
+def glob_number(engine_rows: list[str], cell: tuple[int, int]) -> int:
     row, col = cell[0], cell[1]
     number = engine_rows[row][col]
 
     # Back to start
-    for c in range(col-1, 0, -1):
+    for c in range(col - 1, 0, -1):
         val = engine_rows[row][c]
         if val not in digits:
             break
         number = val + number
     # To the end
-    for c in range(col+1, len(engine_rows[row])):
+    for c in range(col + 1, len(engine_rows[row])):
         val = engine_rows[row][c]
         if val not in digits:
             break
@@ -82,7 +91,8 @@ def glob_number(engine_rows: list[str], cell: tuple[int,int]) -> int:
 
     return int(number)
 
-def group_rows(cells: set[tuple[int,int]]) -> list[set[tuple[int,int]]]:
+
+def group_rows(cells: set[tuple[int, int]]) -> list[set[tuple[int, int]]]:
     row_groups = {}
     for cell in cells:
         if cell[0] not in row_groups.keys():
@@ -93,7 +103,7 @@ def group_rows(cells: set[tuple[int,int]]) -> list[set[tuple[int,int]]]:
     return [group for group in row_groups.values()]
 
 
-def are_contiguous(cells: set[tuple[int,int]]) -> bool:
+def are_contiguous(cells: set[tuple[int, int]]) -> bool:
     # Numbers can only be contiguous within rows.
     cols = sorted([cell[1] for cell in cells])
 
@@ -105,7 +115,7 @@ def are_contiguous(cells: set[tuple[int,int]]) -> bool:
     return True
 
 
-def group_contiguous(cells: set[tuple[int,int]]) -> list[list[tuple[int,int]]]:
+def group_contiguous(cells: set[tuple[int, int]]) -> list[list[tuple[int, int]]]:
     row_groups = {}
     for cell in cells:
         if cell[0] not in row_groups.keys():
@@ -124,18 +134,21 @@ def group_contiguous(cells: set[tuple[int,int]]) -> list[list[tuple[int,int]]]:
         grouped_cols = []
         prev = None
 
-
-
     return []
 
 
-def has_symbol(engine_rows: list[str], locations: set[tuple[int,int]], symbols: set[str]) -> bool:
+def has_symbol(
+    engine_rows: list[str], locations: set[tuple[int, int]], symbols: set[str]
+) -> bool:
     for loc in locations:
         if engine_rows[loc[0]][loc[1]] in symbols:
             return True
     return False
 
-def border(subject: set[tuple[int,int]], engine_dimensions: tuple[int,int]) -> set[tuple[int,int]]:
+
+def border(
+    subject: set[tuple[int, int]], engine_dimensions: tuple[int, int]
+) -> set[tuple[int, int]]:
     height, width = engine_dimensions
 
     all_borders = set()
@@ -148,40 +161,35 @@ def border(subject: set[tuple[int,int]], engine_dimensions: tuple[int,int]) -> s
 
         # Iterate clockwise around the location
         if row > 0 and col > 0:
-            cell_borders.add((row-1,col-1)) # above left
+            cell_borders.add((row - 1, col - 1))  # above left
         if row > 0:
-            cell_borders.add((row-1,col))   # above center
+            cell_borders.add((row - 1, col))  # above center
         if row > 0 and col < width - 1:
-            cell_borders.add((row-1,col+1)) # above right
+            cell_borders.add((row - 1, col + 1))  # above right
         if col < width - 1:
-            cell_borders.add((row,col+1))   # center right
+            cell_borders.add((row, col + 1))  # center right
         if row < height - 1 and col < width - 1:
-            cell_borders.add((row+1,col+1)) # below right
+            cell_borders.add((row + 1, col + 1))  # below right
         if row < height - 1:
-            cell_borders.add((row+1,col))   # below center
+            cell_borders.add((row + 1, col))  # below center
         if row < height - 1 and col > 0:
-            cell_borders.add((row+1,col-1)) # below left
+            cell_borders.add((row + 1, col - 1))  # below left
         if col > 0:
-            cell_borders.add((row,col-1))   # center left
+            cell_borders.add((row, col - 1))  # center left
 
         all_borders.update(cell_borders)
 
-    return all_borders-subject
-
+    return all_borders - subject
 
 
 def border_test():
     tests = [
+        ({(0, 0)}, (4, 4), {(1, 0), (1, 1), (0, 1)}),
         (
-            {(0,0)},
-            (4,4),
-            {(1,0), (1,1), (0,1)}
+            {(1, 1), (1, 2), (1, 3)},
+            (4, 4),
+            {(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3)},
         ),
-        (
-            {(1,1), (1,2), (1,3)},
-            (4,4),
-            {(0,0), (0,1), (0,2), (0,3), (1,0), (2,0), (2,1), (2,2), (2,3)}
-        )
     ]
 
     for test in tests:
@@ -200,7 +208,6 @@ if __name__ == "__main__":
     print("Part 1")
     print(part_1(engine_rows, symbols))
     print()
-
 
     print("Part 2")
     print(part_2(engine_rows))
