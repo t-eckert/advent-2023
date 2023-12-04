@@ -1,4 +1,5 @@
 from lib import read, tee
+from itertools import groupby
 
 digits = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
@@ -30,32 +31,53 @@ def part_1(engine_rows: list[str], symbols: set[str]) -> int:
 
     return total
 
-
 def part_2(engine_rows: list[str]) -> int:
     engine_dimensions = (len(engine_rows), len(engine_rows[0]))
 
-    gear_ratio_sums = 0
+    reading_number = False
+    subject_buffer = set()
+    number_buffer = ""
+
+    numbers = []
+
     for row, vals in enumerate(engine_rows):
         for col, char in enumerate(vals):
-            if char == "*":
-                bordering_cells = border({(row, col)}, engine_dimensions)
-                numeric_bordering_cells = {
-                    cell
-                    for cell in bordering_cells
-                    if has_symbol(engine_rows, {cell}, digits)
-                }
-                grouped_rows = group_rows(numeric_bordering_cells)
-                number_count = 0
-                for r in grouped_rows:
-                    if are_contiguous(r):
-                        number_count += 1
-                    else:
-                        number_count += 2
-                if number_count == 2:
-                    ratio = get_ratio(engine_rows, grouped_rows)
-                    gear_ratio_sums += ratio
+            if char in digits:
+                subject_buffer.add((row, col))
+                number_buffer += char
+                reading_number = True
+            else:
+                if reading_number:
+                    numbers.append(PartNumber(int(number_buffer), subject_buffer.copy()))
+                    subject_buffer.clear()
+                    number_buffer = ""
+                reading_number = False
 
-    return gear_ratio_sums
+    gears = {}
+
+    for number in numbers:
+        for neighbor in border(number.cells, engine_dimensions):
+            if engine_rows[neighbor[0]][neighbor[1]] == "*":
+                if neighbor in gears.keys():
+                    gears[neighbor].append(number)
+                else:
+                    gears[neighbor] = [number]
+
+    total = 0
+    for _, numbers in gears.items():
+        if len(numbers) == 2:
+            total += numbers[0].value * numbers[1].value
+
+    return total
+
+
+class PartNumber:
+    def __init__(self, value: int, cells: set[tuple[int,int]]):
+        self.value = value
+        self.cells = cells
+
+    def __repr__(self) -> str:
+        return f"{self.value}\t{self.cells=}"
 
 
 def get_ratio(engine_rows: list[str], rows: list[set[tuple[int, int]]]) -> int:
@@ -113,28 +135,6 @@ def are_contiguous(cells: set[tuple[int, int]]) -> bool:
             return False
         prev = col
     return True
-
-
-def group_contiguous(cells: set[tuple[int, int]]) -> list[list[tuple[int, int]]]:
-    row_groups = {}
-    for cell in cells:
-        if cell[0] not in row_groups.keys():
-            row_groups[cell[0]] = [cell]
-        else:
-            row_groups[cell[0]].append(cell)
-
-    print(row_groups)
-    for _, group in row_groups.items():
-        cols = []
-        for cell in group:
-            cols.append(cell[1])
-        cols.sort()
-        print(cols)
-
-        grouped_cols = []
-        prev = None
-
-    return []
 
 
 def has_symbol(
