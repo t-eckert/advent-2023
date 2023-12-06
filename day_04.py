@@ -3,6 +3,7 @@ from collections import namedtuple
 
 Card = namedtuple("Card", "id mine winning")
 
+
 def part_1(cards: list[str]) -> int:
     return sum(int(2 ** (count_winning(deserialize_card(card)) - 1)) for card in cards)
 
@@ -28,7 +29,7 @@ def count_winning(card: Card) -> int:
 def deserialize_card(raw: str) -> Card:
     id = raw.split(":")[0]
     mine, winning = raw.split(":")[1].strip().split("|")
-    return Card(id,to_set(mine), to_set(winning))
+    return Card(id, to_set(mine), to_set(winning))
 
 
 def to_set(numbers: str) -> set[int]:
