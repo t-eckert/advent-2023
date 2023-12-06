@@ -25,13 +25,15 @@ def part_1(almanac: Almanac) -> int:
     field = almanac[0]
 
     for mapping in almanac[1]:
-        print(mapping)
         field = translate(field, mapping.translations)
 
     return min(field)
 
 
 def part_2(almanac: Almanac) -> int:
+    seeds = [seed for seed in chunk(almanac[0], 2)]
+    print(seeds)
+
     return 0
 
 
@@ -73,8 +75,13 @@ def translate(field: list[int], translations: list[Translation]) -> list[int]:
     return field
 
 
+def chunk(l: list[int], size: int):
+    for i in range(0, len(l), size):
+        yield l[i:i + size]
+
+
 if __name__ == "__main__":
-    almanac = parse_almanac(read("day_05.txt").strip().split("\n"))
+    almanac = parse_almanac(read("day_05_test.txt").strip().split("\n"))
 
     print("Part 1")
     print(part_1(almanac))
