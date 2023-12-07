@@ -22,17 +22,34 @@ Almanac = tuple[list[int], list[Map]]
 
 
 def part_1(almanac: Almanac) -> int:
-    field = almanac[0]
+    field_1 = almanac[0]
 
     for mapping in almanac[1]:
-        field = translate(field, mapping.translations)
+        field_1 = translate_forwards(field_1, mapping.translations)
 
-    return min(field)
+    print(field_1)
+
+    field = almanac[0]
+
+    locations = []
+    for seed in field:
+        for mapping in almanac[1]:
+            x = seed
+            for translation in mapping.translations:
+                x = forward(x, translation)
+            locations.append(x)
+    print(field)
+    print(min(field))
+
+    return min(field_1)
 
 
 def part_2(almanac: Almanac) -> int:
-    seeds = [seed for seed in chunk(almanac[0], 2)]
-    print(seeds)
+    seeds = [
+        x + seed[0]
+        for seed in chunk(almanac[0], 2)
+        for x in range(seed[1])
+    ]
 
     return 0
 
@@ -59,8 +76,16 @@ def parse_almanac(raw: list[str]) -> Almanac:
 
     return (seeds, maps)
 
+def forward(x: int, translation: Translation) -> int:
+    if (
+        translation.source_start
+        <= x
+        < translation.source_start + translation.length
+    ):
+        return translation.destination_start + x - translation.source_start
+    return x
 
-def translate(field: list[int], translations: list[Translation]) -> list[int]:
+def translate_forwards(field: list[int], translations: list[Translation]) -> list[int]:
     for i, spot in enumerate(field):
         for translation in translations:
             if (
@@ -74,19 +99,24 @@ def translate(field: list[int], translations: list[Translation]) -> list[int]:
 
     return field
 
+def translate_backwards(location: int, translations: list[Translation]) -> int:
+
+    return 0
+
+
 
 def chunk(l: list[int], size: int):
     for i in range(0, len(l), size):
-        yield l[i:i + size]
+        yield l[i : i + size]
 
 
 if __name__ == "__main__":
-    almanac = parse_almanac(read("day_05_test.txt").strip().split("\n"))
+    puzzle_file = "day_05_test.txt"
 
     print("Part 1")
-    print(part_1(almanac))
+    print(part_1(parse_almanac(read(puzzle_file).strip().split("\n"))))
     print()
 
     print("Part 2")
-    print(part_2(almanac))
+    print(part_2(parse_almanac(read(puzzle_file).strip().split("\n"))))
     print()
