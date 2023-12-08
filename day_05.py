@@ -45,11 +45,7 @@ def part_1(almanac: Almanac) -> int:
 
 
 def part_2(almanac: Almanac) -> int:
-    seeds = [
-        x + seed[0]
-        for seed in chunk(almanac[0], 2)
-        for x in range(seed[1])
-    ]
+    seeds = [x + seed[0] for seed in chunk(almanac[0], 2) for x in range(seed[1])]
 
     return 0
 
@@ -76,14 +72,12 @@ def parse_almanac(raw: list[str]) -> Almanac:
 
     return (seeds, maps)
 
+
 def forward(x: int, translation: Translation) -> int:
-    if (
-        translation.source_start
-        <= x
-        < translation.source_start + translation.length
-    ):
+    if translation.source_start <= x < translation.source_start + translation.length:
         return translation.destination_start + x - translation.source_start
     return x
+
 
 def translate_forwards(field: list[int], translations: list[Translation]) -> list[int]:
     for i, spot in enumerate(field):
@@ -99,10 +93,9 @@ def translate_forwards(field: list[int], translations: list[Translation]) -> lis
 
     return field
 
+
 def translate_backwards(location: int, translations: list[Translation]) -> int:
-
     return 0
-
 
 
 def chunk(l: list[int], size: int):
