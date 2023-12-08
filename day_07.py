@@ -3,6 +3,7 @@ from lib import read, tee
 file = "day_07.txt"
 
 labels = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
+labels_jokers_wild = ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"]
 categories = [
     "High card",
     "One pair",
@@ -15,40 +16,51 @@ categories = [
 
 
 class Card:
-    def __init__(self, label: str):
+    def __init__(self, label: str, labels: list[str] = labels):
         self.label = label
+        self.labels = labels
 
     def __repr__(self):
         return self.label
 
     def __hash__(self):
-        return labels.index(self.label)
+        return self.labels.index(self.label)
 
     def __lt__(self, other):
-        return labels.index(self.label) < labels.index(other.label)
+        return self.labels.index(self.label) < self.labels.index(other.label)
 
     def __gt__(self, other):
-        return labels.index(self.label) > labels.index(other.label)
+        return self.labels.index(self.label) > self.labels.index(other.label)
 
     def __eq__(self, other):
-        return labels.index(self.label) == labels.index(other.label)
+        return self.labels.index(self.label) == self.labels.index(other.label)
 
 
 class Hand:
-    def __init__(self, cards: list[Card], bid: int):
+    def __init__(self, cards: list[Card], bid: int, jokers_wild: bool = False):
         self.cards = cards
         self.bid = bid
+        self.jokers_wild = jokers_wild
 
     def __repr__(self):
         return f"{self.cards}: {self.bid}"
 
     def category(self) -> str:
+        if self.jokers_wild and Card("J", labels=labels_jokers_wild) in self.cards:
+            return self.__category_jokers_wild()
+
         sorted_cards = sorted(self.cards)
 
         if len(set(self.cards)) == 1:
             return "Five of a kind"
         elif len(set(self.cards)) == 2:
-            if sorted_cards[0] == sorted_cards[1] == sorted_cards[2] == sorted_cards[3]:
+            if (
+                sorted_cards[0] == sorted_cards[1] == sorted_cards[2] == sorted_cards[3]
+                or sorted_cards[1]
+                == sorted_cards[2]
+                == sorted_cards[3]
+                == sorted_cards[4]
+            ):
                 return "Four of a kind"
             else:
                 return "Full house"
@@ -65,6 +77,11 @@ class Hand:
             return "One pair"
         else:
             return "High card"
+
+    def __category_jokers_wild(self) -> str:
+        """Jokers are wild and can be used to complete any hand."""
+
+        return "High card"
 
     def __hash__(self):
         return hash(self.cards)
@@ -94,16 +111,15 @@ class Hand:
 
 
 def part_1(puzzle: list[str]) -> int:
-    hands = []
-    for rank, hand in sorted(enumerate(sorted(parse(puzzle)))):
-        print(f"{hand}\t{sorted(hand.cards)}{hand.category()}\t{rank + 1}\t{hand.bid*(rank + 1)}")
-        hands.append(hand)
-
-    return sum([hand.bid * (rank + 1) for rank, hand in enumerate(sorted(parse(puzzle)))])
+    return sum(
+        [hand.bid * (rank + 1) for rank, hand in enumerate(sorted(parse(puzzle)))]
+    )
 
 
 def part_2(puzzle: list[str]) -> int:
-    return 0
+    return sum(
+        [hand.bid * (rank + 1) for rank, hand in enumerate(sorted(parse_jokers_wild(puzzle)))]
+    )
 
 
 def parse(puzzle: list[str]) -> list[Hand]:
@@ -113,6 +129,12 @@ def parse(puzzle: list[str]) -> list[Hand]:
         hands.append(Hand([Card(card) for card in cards], int(bid.strip())))
     return hands
 
+def parse_jokers_wild(puzzle: list[str]) -> list[Hand]:
+    hands = []
+    for line in puzzle:
+        cards, bid = line.split(" ")
+        hands.append(Hand([Card(card, labels_jokers_wild) for card in cards], int(bid.strip())))
+    return hands
 
 def test_hands():
     tests = [
@@ -164,4 +186,10 @@ def test_sorting():
 if __name__ == "__main__":
     puzzle = read(file).strip().splitlines()
 
-    part_1(puzzle)
+    print("Part 1")
+    print(part_1(puzzle))
+    print()
+
+    print("Part 2")
+    print(part_2(puzzle))
+    print()

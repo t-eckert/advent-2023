@@ -7,7 +7,7 @@ session = os.environ["AOC_COOKIE"]
 
 
 if len(sys.argv) > 1:
-    day = sys.argv[1]
+    day = int(sys.argv[1])
 else:
     day = datetime.now().day
 
